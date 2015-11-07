@@ -20,6 +20,8 @@ public class ToyDatabase {
     private ArrayList<Student> studentList = new ArrayList<>();
     private ArrayList<InternshipOffer> offerList = new ArrayList<>();
     private Scanner scanner = new Scanner(System.in);
+    private String directory = null;
+    private boolean isDatabaseOpen = false;
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
 
@@ -35,11 +37,24 @@ public class ToyDatabase {
             if(validateInput()) {
                 if(this.userInput == 1) {
                     openDatabase();
+                    this.isDatabaseOpen = true;
                 } else if(this.userInput == 2) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, sorry!");
+                        continue;
+                    }
                     enterNewStudentRecord();
                 } else if(this.userInput == 3) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, sorry!");
+                        continue;
+                    }
                     enterNewInternshipOfferRecord();
                 } else if(this.userInput == 4) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, sorry!");
+                        continue;
+                    }
                     System.out.print("Enter student name : ");
                     ArrayList<String> companyList = getCompanyList(this.scanner.next().trim());
                     if(companyList == null) {
@@ -53,6 +68,11 @@ public class ToyDatabase {
                         }
                     }
                 } else if(this.userInput == 5) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, sorry!");
+                        continue;
+                    }
+                    System.out.print("Enter company name : ");
                     ArrayList<Student> students = getSelectedStudents(this.scanner.next().trim());
                     if(students == null) {
                         System.out.println("Null");
@@ -67,15 +87,36 @@ public class ToyDatabase {
                         }
                     }
                 } else if(this.userInput == 6) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, sorry!");
+                        continue;
+                    }
                     System.out.println("Average Salary : " + getAverageSalaryOffered());
                 } else if(this.userInput == 7) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, sorry!");
+                        continue;
+                    }
                     System.out.println("Total number of students : " + getTotalStudents());
                 } else if(this.userInput == 8) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, sorry!");
+                        continue;
+                    }
                     System.out.println("Total number of students with offers : " + getTotalStudentsWithOffer());
                 } else if(this.userInput == 9) {
+                    if(!this.isDatabaseOpen) {
+                        System.out.println("Database isn't opened, can't perform close!");
+                        continue;
+                    }
                     System.out.println("Closing the database : thank you!");
                     closeDatabase();
+                    this.isDatabaseOpen = false;
                 } else {
+                    if(this.isDatabaseOpen) {
+                        System.out.println("Please close the database first!");
+                        continue;
+                    }
                     System.out.println("Exiting...");
                     break;
                 }
@@ -121,6 +162,7 @@ public class ToyDatabase {
             System.out.println("The directory " + dir + " is created");
         }
         try {
+            this.directory = dir;
             readData(dir);
         } catch (Exception e) {
             System.out.println("Reading data error : " + e.getMessage());
@@ -260,20 +302,22 @@ public class ToyDatabase {
     }
     private void closeDatabase() throws IOException {
         try {
-            FileOutputStream fout = new FileOutputStream(this.studentRecordFileName);
+            FileOutputStream fout = new FileOutputStream(this.directory + "/" + this.studentRecordFileName);
             ObjectOutputStream oos = new ObjectOutputStream(fout);
             for(int i = 0; i < this.studentList.size(); i++) {
                 oos.writeObject(this.studentList.get(i));
             }
             fout.close();
             oos.close();
-            fout = new FileOutputStream(this.internshipOfferRecordFileName);
+            System.out.println(studentList.size() + " student records stored to db");
+            fout = new FileOutputStream(this.directory + "/" + this.internshipOfferRecordFileName);
             oos = new ObjectOutputStream(fout);
             for(int i = 0; i < this.offerList.size(); i++) {
                 oos.writeObject(this.offerList.get(i));
             }
             fout.close();
             oos.close();
+            System.out.println(this.offerList.size() + " internship records stored to db");
         } catch (Exception e) {
             System.out.println("closing database error : " + e.getMessage());
         }
